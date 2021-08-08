@@ -110,10 +110,12 @@ void LTReader() {
                         {
                         	const std::lock_guard<std::mutex> lock(LTIOMutex);
                         	string cmd = LTBuffer;
-                        	LTBuffer = "";
-                            LTPromtUpdateNM();
+							printf("\r%*s\r", (int)LTBuffer.length()+(int)LTPromt.length(), "");
+							LTBuffer = "";
+							printf("%s%s", LTPromt.c_str(), LTBuffer.c_str());
                             if(LTCommander != NULL) {
                             	thread c(LTCommander, cmd);
+								c.detach();
                             }
                         }
                         break;
@@ -168,6 +170,7 @@ bool LivetermInit(void (*Commander)(string)) {
     LTPromtUpdate();
     // thread newreader(LTReader);
     LTReaderT = thread(LTReader);
+	// LTReaderT.join();
 	// LTReaderT.detach();
     LTInitDone = true;
     return 0;

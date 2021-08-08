@@ -18,6 +18,8 @@ void myCommander(string a) {
 		const std::lock_guard<std::mutex> lock(exitFlagMutex);
 		exitFlag = true;
 		LTPrintf("Exiting...");
+	} else {
+		LTPrintf("Unknown command [%s], use `exit` to exit.", a.c_str());
 	}
 	return;
 }
@@ -39,7 +41,7 @@ void mySpammer() {
 }
 
 int main() {
-	if(!LivetermInit(&myCommander)) {
+	if(LivetermInit(&myCommander)) {
 		LTPrintf("Startup error! (%d %s)", errno, strerror(errno));
 		return 1;
 	}
@@ -48,8 +50,8 @@ int main() {
 	
 	spam.join();
 	
-	if(!LivetermShutdown()) {
-		LTPrintf("Shutdown error!");
+	if(LivetermShutdown()) {
+		LTPrintf("Shutdown error! (%d %s)", errno, strerror(errno));
 		return 1;
 	}
 	return 0;
