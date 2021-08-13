@@ -1,8 +1,5 @@
 #include "liveterm.h"
 
-#include <sys/ioctl.h>
-#include <unistd.h>
-#include <termios.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -11,6 +8,13 @@
 #include <errno.h>
 
 using namespace std;
+
+#ifdef __unix__
+#define LEVETERM_ENV
+#include <sys/ioctl.h>
+#include <unistd.h>
+#include <termios.h>
+#endif
 
 struct termios LTAttr;
 
@@ -60,12 +64,16 @@ void LivetermSetPromt(std::string p) {
 }
 
 bool LTTermSize() {
+#ifdef LEVETERM_ENV
 	struct winsize size;
 	if(ioctl(0, TIOCSWINSZ, (char *)&size)) {
 		return true;
 	}
 	LTTermWidth = size.ws_row;
 	return false;
+#else
+	return true;
+#endif
 }
 
 void LTPromtUpdate() {
@@ -148,6 +156,7 @@ void LTReader() {
 }
 
 bool LivetermInit(void (*Commander)(string)) {
+#ifdef LEVETERM_ENV
     LivetermSetCommander(Commander);
     setbuf(stdout, 0);
     setbuf(stdin, 0);
@@ -174,6 +183,10 @@ bool LivetermInit(void (*Commander)(string)) {
 	// LTReaderT.detach();
     LTInitDone = true;
     return 0;
+#else
+	printf("Terminal not supported.\n\r");
+	return 1;
+#endif
 }
 
 bool LivetermShutdown() {
