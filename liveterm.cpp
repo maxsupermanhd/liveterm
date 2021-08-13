@@ -9,7 +9,7 @@
 
 using namespace std;
 
-#ifndef __unix__
+#ifdef __unix__
 #define LEVETERM_ENV
 #include <sys/ioctl.h>
 #include <unistd.h>
