@@ -9,14 +9,14 @@
 
 using namespace std;
 
-#ifdef __unix__
+#ifndef __unix__
 #define LEVETERM_ENV
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <termios.h>
+struct termios LTAttr;
 #endif
 
-struct termios LTAttr;
 
 static string LTDefaultPromt = "[~>";
 
@@ -112,7 +112,11 @@ void LTReader() {
             case 0:
             {
                 char c;
+#ifdef LEVETERM_ENV
                 if(read(STDIN_FILENO, &c, 1) == 1) {
+#else
+				if(fread(&c, 1, 1, stdin) == 1) {
+#endif
                     switch(c) {
                         case '\n':
                         {
@@ -194,9 +198,11 @@ bool LivetermShutdown() {
         LTPrintf("CT shutdown.\n");
         LTSetReaderControl(-1);
         LTReaderT.join();
+#ifdef LEVETERM_ENV
         if(tcsetattr(STDIN_FILENO, TCSANOW, &LTAttr)) {
             return 1;
         }
+#endif
         printf("\n");
         LTInitDone = false;
     }
